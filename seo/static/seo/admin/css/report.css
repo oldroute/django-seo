@@ -1,0 +1,138 @@
+/* admin customizing */
+
+.field-box.field-title_operation label,
+.field-box.field-desc_operation label,
+.field-box.field-keys_operation label,
+.field-box.field-title_apply_type label,
+.field-box.field-desc_apply_type label,
+.field-box.field-keys_apply_type label {
+    width: 0;
+    height: 0;
+    padding: 0;
+}
+
+
+.form-row.field-title_operation ul,
+.form-row.field-desc_operation ul,
+.form-row.field-keys_operation ul {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/**/
+
+.form-row.field-title_report table,
+.form-row.field-desc_report table,
+.form-row.field-keys_report table {
+    width: 100%;
+}
+
+.form-row.field-title_report label,
+.form-row.field-desc_report label,
+.form-row.field-keys_report label {
+    display: none;
+}
+
+tr.danger,
+tr.danger a {
+    background:#f8d7da;
+    color: #721c24;
+}
+
+tr.danger td {
+    border-bottom: 1px solid #ecafaf;
+}
+
+tr.warning,
+tr.warning a {
+    background:#fcddaf;
+    color: #856404;
+}
+
+tr.warning td {
+    border-bottom: 1px solid #f6ce59;
+}
+
+tr.success,
+tr.success a {
+    color: #155724;
+    background:#d4edda;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.table-container {
+    position: relative;
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 10px 0 40px;
+
+}
+
+
+table.tablesorter thead tr th,
+table.tablesorter tfoot tr th,
+table.tablesorter tbody tr td {
+	padding: 3px 6px;
+}
+
+table.tablesorter thead tr th {
+    vertical-align: middle;
+}
+
+table.tablesorter thead tr .header {
+	background-image: url(bg.gif);
+	background-repeat: no-repeat;
+	background-position: center right;
+	cursor: pointer;
+    padding: 8px 18px 8px 6px;
+    white-space: pre;
+}
+
+table.tablesorter tbody tr.odd td {
+	background-color:#F0F0F6;
+}
+table.tablesorter thead tr .headerSortUp {
+	background-image: url(asc.gif);
+}
+table.tablesorter thead tr .headerSortDown {
+	background-image: url(desc.gif);
+}
+table.tablesorter thead tr .headerSortDown,
+table.tablesorter thead tr .headerSortUp {
+    background-color: #8dbdd8;
+    color: #fff;
+}
+
+.strong {
+    font-weight:600;
+}
+
+
+/* summary */
+
+.form-row.field-title_report table.summary,
+.form-row.field-desc_report table.summary,
+.form-row.field-keys_report table.summary {
+    width: 250px;
+}
+
+.form-row.field-report table.summary tr td:last-child {
+    text-align: right;
+}
+
+.report-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 10px 0 40px;
+}
+
+.report-col {
+    margin-right: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-
-from django.conf import settings
-from django.contrib import admin
 from django.contrib.contenttypes import generic
-from django.core.exceptions import ImproperlyConfigured
-from seo.importpath import importpath
-from seo.forms import SeoForm
-from seo.models import Seo, Url
+from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
+from seo.forms import SeoForm, SeoTemplateAdminForm
+from seo.models import Seo, Url, SeoTemplate
+from seo.utils.utils import get_seo_models, get_seogen_models
+
 
 class SeoInlines(generic.GenericStackedInline):
     model = Seo
@@ -31,15 +30,8 @@ try:
 except admin.sites.AlreadyRegistered:
     pass
 
-if not hasattr(settings, 'SEO_FOR_MODELS'):
-    raise ImproperlyConfigured('Please add ``SEO_FOR_MODELS = ["<app>.admin.<ModelAdmin>",]`` to your settings.py')
-
-for model_name in settings.SEO_FOR_MODELS:
-    model = importpath(model_name, 'SEO_FOR_MODELS')
-    try:
-        model_admin = admin.site._registry[model].__class__
-    except KeyError:
-        raise ImproperlyConfigured('Please set ``seo`` in your settings.py only as last INSTALLED_APPS')
+for model in get_seo_models():
+    model_admin = admin.site._registry[model].__class__
     admin.site.unregister(model)
 
     setattr(model_admin, 'inlines', getattr(model_admin, 'inlines', []))
@@ -47,3 +39,44 @@ for model_name in settings.SEO_FOR_MODELS:
         model_admin.inlines = list(model_admin.inlines)[:] + [SeoInlines]
 
     admin.site.register(model, model_admin)
+
+
+class SeoTemplateInline(GenericStackedInline):
+
+    # template = 'admin/seogen/edit_inline/stacked.html'
+
+    model = SeoTemplate
+    form = SeoTemplateAdminForm
+    extra = 0
+    max_num = 1
+    fieldsets = (
+        (u'title', {
+            "fields": ("title_t", "title_l", ('title_operation', 'title_apply_type', 'title_apply_is_cycled'), 'title_report', ),
+            "classes": ("collapse",)
+        }),
+        (u'description', {
+            "fields": ("desc_t", "desc_l", ('desc_operation', 'desc_apply_type', 'desc_apply_is_cycled'), 'desc_report',),
+            "classes": ("collapse",)
+        }),
+        (u'keywords', {
+            "fields": ("keys_t", "keys_l", ('keys_operation', 'keys_apply_type', 'keys_apply_is_cycled'), 'keys_report',),
+            "classes": ("collapse",)
+        }),
+        ('json', {
+            "fields": ("data",),
+            "classes": ("collapse",)
+        }),
+
+    )
+
+
+for model in get_seogen_models():
+    model_admin = admin.site._registry[model].__class__
+    admin.site.unregister(model)
+
+    setattr(model_admin, 'inlines', getattr(model_admin, 'inlines', []))
+    if not SeoTemplateInline in model_admin.inlines:
+        model_admin.inlines = list(model_admin.inlines)[:] + [SeoTemplateInline]
+
+    admin.site.register(model, model_admin)
+

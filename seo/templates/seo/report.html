@@ -1,0 +1,75 @@
+
+<div class="report-container">
+    <div class="report-col">
+        <h1>Сгенерированные тексты</h1>
+        <table class="summary">
+            {% if incorrect %}
+                <tr><td>Всего</td><td>{{ texts|length }}</td></tr>
+                <tr><td>Некорректных</td><td>{{ incorrect }}</td></tr>
+            {% endif %}
+            {% if correct %}
+                <tr><td class="strong">Доступно:</td><td class="strong">{{ correct }}</td></tr>
+            {% else %}
+                <tr><td class="strong">Нет доступных текстов</td><td></td></tr>
+            {% endif %}
+        </table>
+    </div>
+    {% if items %}
+    <div class="report-col">
+        <h1>Товары раздела</h1>
+        <table class="summary">
+            <tr><td>Всего</td><td>{{ items|length|default:"0" }}</td></tr>
+            <tr title="Вручную или сгенерирован" ><td>Текст заполнен</td><td>{{ busy_items }}</td></tr>
+            <tr><td class="strong">Текст отсутствует</td><td class="strong">{{ free_items }}</td></tr>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+{% if texts %}
+    <h1>Детали по сгенерированным текстам</h1>
+    <div class="table-container">
+        <table class="tablesorter">
+            <thead>
+                <th>№</th>
+                <th>Текст</th>
+                <th>Длина</th>
+            </thead>
+            <tbody>
+                {% for text in texts %}
+                   <tr {% if text.warning %}title="{{ text.warning }}"{% endif %} class="{{ text.class }}">
+                       <td>{{ forloop.counter }}</td>
+                       <td>{{ text.value }}</td>
+                       <td>{{ text.value|length|default:"" }}</td>
+                   </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+</div>
+{% endif %}
+
+{% if items %}
+    <h1>Детали по товарам раздела</h1>
+    <div class="table-container">
+        <table class="tablesorter">
+            <thead>
+                <th>Название</th>
+                <th>Сгенерированный текст</th>
+                <th>Длина</th>
+                <th>Текст заполненный вручную</th>
+                <th>Длина</th>
+            </thead>
+            <tbody>
+                {% for id, item in items.iteritems %}
+                   <tr {% if item.warning %}title="{{ item.warning }}"{% endif %} class="{{ item.class }}">
+                       <td title="Редактировать"><a href="{{ item.change_link }}" target="_blank">{{ item.name }}</a></td>
+                       <td>{{ item.gen_text|default:"" }}</td>
+                       <td>{{ item.gen_text|length|default:"" }}</td>
+                       <td>{{ item.seo_text|default:"" }}</td>
+                       <td>{{ item.seo_text|length|default:"" }}</td>
+                   </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endif %}
