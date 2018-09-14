@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from jsonfield import JSONField
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.core.cache import cache
 
 
 class Seo(models.Model):
@@ -221,6 +222,15 @@ class SeoTemplate(models.Model):
             if need_save:
                 self.save()
             return True
+
+    def delete_cache(self, item):
+
+        """ Удалить seo-данные доч. элемента из кэша """
+
+        item_ct = ContentType.objects.get_for_model(item)
+        item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
+        cache.delete(item_cache_key)
+        return
 
     def __str__(self):
         return ""

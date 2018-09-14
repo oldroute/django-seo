@@ -197,7 +197,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
         for key, val in self.data["items"].iteritems():
             if not val[metatag_name]["gen_text"]:
                 free_items.append((key, val))
-        free_items.sort(key=lambda x: x[1][metatag_name]["seo_text"])
+        free_items.sort(key=lambda x: x[1][metatag_name]["seo_text"], reverse=True)
         return OrderedDict(free_items)
 
     def apply_texts(self, metatag_name):

@@ -32,6 +32,7 @@ def save_child_handler(sender, instance, **kwargs):
             seo_template.create_data_item(instance)
         else:
             seo_template.update_data_item(instance)
+        seo_template.delete_cache(item)
     print "------> SAVE CHILD", kwargs.get("created"), type(instance), instance
     return
 
@@ -40,30 +41,34 @@ for model_cls in get_child_models():
     signals.post_save.connect(save_child_handler, sender=model_cls)
 
 
-def delete_treeitem_handler(sender, instance, **kwargs):
+def delete_treeitem_handler(sender, treeitem, **kwargs):
 
-    if instance.parent:
-        parent = instance.parent.content_object
+    if treeitem.parent:
+        parent = treeitem.parent.content_object
         parent_ct = ContentType.objects.get_for_model(parent)
         seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
 
         if seo_template:
-            seo_template.remove_data_item(parent_ct)
-            print "------> DEL CHILD", type(parent_ct), parent_ct
+            item = treeitem.content_object
+            seo_template.remove_data_item(item)
+            seo_template.delete_cache(item)
+            print "------> DEL CHILD", type(item), item
     return
 
 
 signals.pre_delete.connect(delete_treeitem_handler, sender=TreeItem)
 
 
-def item_parent_changed(sender, instance, **kwargs):
+def item_parent_changed(sender, item, **kwargs):
 
     parent_from = kwargs.get("parent_from")
     if parent_from:
         parent_from_ct = ContentType.objects.get_for_model(parent_from)
         seo_template_from = SeoTemplate.objects.filter(content_type=parent_from_ct, object_id=parent_from.id).first()
         if seo_template_from:
-            seo_template_from.remove_data_item(instance)
+            seo_template_from.remove_data_item(item)
+            seo_template_from.delete_cache(item)
+
             print "------> REMOVED FROM", parent_from
 
     parent_to = kwargs.get("parent_to")
@@ -71,7 +76,7 @@ def item_parent_changed(sender, instance, **kwargs):
         parent_to_ct = ContentType.objects.get_for_model(parent_to)
         seo_template_to = SeoTemplate.objects.filter(content_type=parent_to_ct, object_id=parent_to.id).first()
         if seo_template_to:
-            seo_template_to.create_data_item(instance)
+            seo_template_to.create_data_item(item)
             print "------> CREATED IN", parent_to
 
     return
@@ -91,6 +96,7 @@ def seo_del_handler(sender, instance, **kwargs):
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
                 seo_template.update_data_item(item)
+                seo_template.delete_cache(item)
                 print "------> SEO DEL", type(instance), instance
     return
 
@@ -109,6 +115,7 @@ def seo_save_handler(sender, instance, **kwargs):
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
                 seo_template.update_data_item(item)
+                seo_template.delete_cache(item)
                 print "------> SEO SAVE", type(instance), instance
     return
 

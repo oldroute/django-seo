@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 
 class ReportWidget(Widget):
 
-    template = 'seo/report.html'
+    template = 'seo/admin/report.html'
 
     def render(self, name, value, attrs=None):
         # Приготовить словарь текстов готовых к выводу в таблице
@@ -68,6 +68,7 @@ class ReportWidget(Widget):
             "busy_items": busy_items,
             "items": items,
             "texts": text_objs,
+            "metatag_name": metatag_name
         }
 
         return mark_safe(render_to_string(self.template, context))

@@ -62,10 +62,10 @@ class SeoTemplateInline(GenericStackedInline):
             "fields": ("keys_t", "keys_l", ('keys_operation', 'keys_apply_type', 'keys_apply_is_cycled'), 'keys_report',),
             "classes": ("collapse",)
         }),
-        ('json', {
-            "fields": ("data",),
-            "classes": ("collapse",)
-        }),
+        # ('json', {
+        #     "fields": ("data",),
+        #     "classes": ("collapse",)
+        # }),
 
     )
 
