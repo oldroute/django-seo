@@ -2,6 +2,7 @@
 import itertools
 from collections import OrderedDict
 from django import forms
+from django.forms import widgets
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
 from seo.models import Seo, SeoTemplate
@@ -82,17 +83,17 @@ class SeoTemplateAdminForm(forms.ModelForm):
             'seo/admin/js/tablesorter_init.js',
         )
 
-    title_operation = forms.ChoiceField(choices=OPERATIONS, required=False, label="", widget=forms.RadioSelect())
+    title_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
     title_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
     title_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
     title_report = forms.CharField(required=False, widget=ReportWidget())
 
-    desc_operation = forms.ChoiceField(choices=OPERATIONS, required=False, label="", widget=forms.RadioSelect())
+    desc_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
     desc_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
     desc_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
     desc_report = forms.CharField(required=False, widget=ReportWidget())
 
-    keys_operation = forms.ChoiceField(choices=OPERATIONS, required=False, label="", widget=forms.RadioSelect())
+    keys_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
     keys_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
     keys_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
     keys_report = forms.CharField(required=False, widget=ReportWidget())
@@ -111,7 +112,12 @@ class SeoTemplateAdminForm(forms.ModelForm):
         cleaned_data = super(SeoTemplateAdminForm, self).clean()
         for key, val in cleaned_data.iteritems():
             if "operation" in key or "apply_type" in key:
-                int_val = 0 if not len(val) else int(val.encode("ascii"))
+                if isinstance(val, list):
+                    int_val = []
+                    for elem in val:
+                        int_val.append(int(elem.encode("ascii")))
+                else:
+                    int_val = 0 if not len(val) else int(val.encode("ascii"))
                 cleaned_data[key] = int_val
         return cleaned_data
 
@@ -241,13 +247,15 @@ class SeoTemplateAdminForm(forms.ModelForm):
 
         """ Применить операции метатега и обновить его данные в data json"""
 
-        operation = self.cleaned_data[metatag_name + "_operation"]
+        operations = self.cleaned_data[metatag_name + "_operation"]
+
         limit = int(self.cleaned_data[metatag_name + "_l"])
         texts = self.data[metatag_name]["list"]
 
-        if operation == self.GENERATE_TEXTS:
+        if self.GENERATE_TEXTS in operations:
             self.generate_texts(metatag_name)  # Генерация текстов по шаблону и запись в список текстов
-        elif operation == self.APPLY_TEXTS:
+
+        if self.APPLY_TEXTS in operations:
             self.apply_texts(metatag_name)  # Назначение свободных текстов дочерним элементам
 
         correct, incorrect = 0, 0
