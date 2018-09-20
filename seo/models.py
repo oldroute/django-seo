@@ -156,15 +156,15 @@ class SeoTemplate(models.Model):
             "change_link": item_change_link,
             "title": {
                 "seo_text": seo.title if seo else None,
-                "gen_text": self.__get_text("title"),
+                "gen_text": None if (seo and seo.title) else self.__get_text("title"),
             },
             "desc": {
                 "seo_text": seo.description if seo else None,
-                "gen_text": self.__get_text("desc"),
+                "gen_text": None if (seo and seo.description) else self.__get_text("desc"),
             },
             "keys": {
                 "seo_text": seo.keywords if seo else None,
-                "gen_text": self.__get_text('keys'),
+                "gen_text": None if (seo and seo.keywords) else self.__get_text("keys"),
             },
         }
         self.data["items"][item_key] = new_item
