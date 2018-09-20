@@ -229,6 +229,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
             # количество текстов станет = количеству элементов
             texts = self.__get_cycled_texts(texts, cycled_count=len(items))
 
+        result = {}
         if texts and items.keys():
             while texts and items.keys():
                 item_key, value = items.popitem()
@@ -237,9 +238,10 @@ class SeoTemplateAdminForm(forms.ModelForm):
                 if item:
                     text = resolve_template_vars(item, text)
                 value[metatag_name]["gen_text"] = text
-                self.data["items"][item_key] = value
+                result[item_key] = value
                 # когда тексты или элементы закончтся прервать распределение
 
+            self.data["items"] = result
             self.data[metatag_name]["list"] = texts
         return True
 
@@ -257,7 +259,6 @@ class SeoTemplateAdminForm(forms.ModelForm):
 
         if self.APPLY_TEXTS in operations:
             self.apply_texts(metatag_name)  # Назначение свободных текстов дочерним элементам
-
         correct, incorrect = 0, 0
         for text in texts:
             if len(text) > limit:
