@@ -166,10 +166,8 @@ class SeoTemplateAdminForm(forms.ModelForm):
         """ Генерирует список текстов по шаблону """
 
         template = self.cleaned_data[metatag_name + "_t"]
-        # заменить шаблонные переменные в шаблоне на значения
-        resolved_template = resolve_template_vars(self.instance.content_object, template)
         # сгенерировать список текстов по шаблону
-        seo_generator = SeoGenerator(resolved_template)
+        seo_generator = SeoGenerator(template)
         self.data[metatag_name]["list"] = seo_generator.generate_textlist()
         return True
 
@@ -200,11 +198,18 @@ class SeoTemplateAdminForm(forms.ModelForm):
         free_items.sort(key=lambda x: x[1][metatag_name]["seo_text"], reverse=True)
         return OrderedDict(free_items)
 
+    def __get_item_instance(self, item_key):
+        ct_id, item_id = [int(val) for val in item_key.split("-")]
+        item_cls = ContentType.objects.get(id=ct_id).model_class()
+        item = item_cls.objects.filter(id=item_id).first()
+        return item
+
     def apply_texts(self, metatag_name):
 
         apply_type = self.cleaned_data.get(metatag_name + "_apply_type", self.APPLY_FOR_FREE)
         apply_is_cycled = self.cleaned_data.get(metatag_name + "_apply_is_cycled", False)
         texts = self.__get_valid_texts(metatag_name)
+
         items = {}
 
         # Назначение текстов всем свободным элементам
@@ -221,7 +226,11 @@ class SeoTemplateAdminForm(forms.ModelForm):
         if texts and items.keys():
             while texts and items.keys():
                 item_key, value = items.popitem()
-                value[metatag_name]["gen_text"] = texts.pop()
+                text = texts.pop()
+                item = self.__get_item_instance(item_key)
+                if item:
+                    text = resolve_template_vars(item, text)
+                value[metatag_name]["gen_text"] = text
                 self.data["items"][item_key] = value
                 # когда тексты или элементы закончтся прервать распределение
 

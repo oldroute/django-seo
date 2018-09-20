@@ -10,6 +10,7 @@ from jsonfield import JSONField
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.core.cache import cache
+from seo.utils.template import resolve_template_vars
 
 
 class Seo(models.Model):
@@ -121,23 +122,17 @@ class SeoTemplate(models.Model):
                     children.append(content_object)
         return children
 
-    def __get_text(self, metatag_name):
+    def __get_text(self, metatag_name, item):
 
         """ Возвращает сгенерированный валидный текст метатега """
 
         limit = self.data[metatag_name]["limit"]
         for i in range(len(self.data[metatag_name]["list"])):
             if len(self.data[metatag_name]["list"][i]) <= limit:
-                return self.data[metatag_name]["list"].pop(i)
+                text = self.data[metatag_name]["list"].pop(i)
+                text = resolve_template_vars(item, text)
+                return text
         return None
-
-    def __return_text(self, metatag_name, item):
-
-        """ Возвращает текст метатега обратно в список текстов """
-
-        text = item[metatag_name]["gen_text"]
-        if text:
-            self.data[metatag_name]["list"].append(text)
 
     def create_data_item(self, item, need_save=True):
 
@@ -156,15 +151,15 @@ class SeoTemplate(models.Model):
             "change_link": item_change_link,
             "title": {
                 "seo_text": seo.title if seo else None,
-                "gen_text": None if (seo and seo.title) else self.__get_text("title"),
+                "gen_text": None if (seo and seo.title) else self.__get_text("title", item),
             },
             "desc": {
                 "seo_text": seo.description if seo else None,
-                "gen_text": None if (seo and seo.description) else self.__get_text("desc"),
+                "gen_text": None if (seo and seo.description) else self.__get_text("desc", item),
             },
             "keys": {
                 "seo_text": seo.keywords if seo else None,
-                "gen_text": None if (seo and seo.keywords) else self.__get_text("keys"),
+                "gen_text": None if (seo and seo.keywords) else self.__get_text("keys", item),
             },
         }
         self.data["items"][item_key] = new_item
@@ -174,23 +169,20 @@ class SeoTemplate(models.Model):
 
     def remove_data_item(self, item, need_save=True):
 
-        """ Удалить элемент из data, освободить тексты метатегов"""
+        """ Удалить элемент из data """
 
         item_ct = ContentType.objects.get_for_model(item)
         item_key = "%d-%d" % (item_ct.id, item.id)
         item_data = self.data["items"].pop(item_key, None)
-
-        if item_data:
-            self.__return_text("title", item_data)
-            self.__return_text("desc", item_data)
-            self.__return_text("keys", item_data)
 
         if need_save:
             self.save()
         return
 
     def update_data_item(self, item, need_save=True):
-        """ Обновить запись элемента в data """
+
+        """ Обновить запись элемента в data (все кроме текстов по шаблону)"""
+
         item_ct = ContentType.objects.get_for_model(item)
         item_key = "%d-%d" % (item_ct.id, item.id)
         old_item_data = self.data["items"].get(item_key, False)
