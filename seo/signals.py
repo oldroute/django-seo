@@ -41,8 +41,9 @@ for model_cls in get_child_models():
     signals.post_save.connect(save_child_handler, sender=model_cls)
 
 
-def delete_treeitem_handler(sender, treeitem, **kwargs):
+def delete_treeitem_handler(sender, instance, **kwargs):
 
+    treeitem = instance
     if treeitem.parent:
         parent = treeitem.parent.content_object
         parent_ct = ContentType.objects.get_for_model(parent)
@@ -59,8 +60,9 @@ def delete_treeitem_handler(sender, treeitem, **kwargs):
 signals.pre_delete.connect(delete_treeitem_handler, sender=TreeItem)
 
 
-def item_parent_changed(sender, item, **kwargs):
+def item_parent_changed(sender, instance, **kwargs):
 
+    item = instance
     parent_from = kwargs.get("parent_from")
     if parent_from:
         parent_from_ct = ContentType.objects.get_for_model(parent_from)
