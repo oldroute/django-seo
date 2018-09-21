@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from seo.models import Seo, SeoTemplate
 from seo.utils.template import resolve_template_vars
 from seo.utils.parser import SeoGenerator
+from seo.utils.utils import get_seo_metatag_name
 from seo.widgets import ReportWidget
 
 
@@ -47,10 +48,12 @@ class SeoTemplateAdminForm(forms.ModelForm):
     PASS = 0
     APPLY_TEXTS = 1
     GENERATE_TEXTS = 2
+    ClEAR_TEXTS = 3
 
     OPERATIONS = (
         (GENERATE_TEXTS, u'Сгенерировать тексты'),
         (APPLY_TEXTS, u'Применить тексты'),
+        (ClEAR_TEXTS, u'Удалить тексты заполненные вручную'),
     )
 
     APPLY_FOR_FREE = 0
@@ -236,10 +239,27 @@ class SeoTemplateAdminForm(forms.ModelForm):
                     text = resolve_template_vars(item, text)
                 value[metatag_name]["gen_text"] = text
                 self.data["items"][item_key] = value
+                self.instance.delete_cache(item_key=item_key)
                 # когда тексты или элементы закончтся прервать распределение
 
             self.data[metatag_name]["list"] = texts
         return True
+
+    def clear_texts(self, metatag_name):
+        from seo.signals import seo_save_handler
+        from django.db.models import signals
+        signals.post_save.disconnect(seo_save_handler, Seo)
+        for item_key in self.data["items"].keys():
+            item_ct_id, item_id = [int(val) for val in item_key.split('-')]
+            seo = Seo.objects.filter(object_id=item_id, content_type_id=item_ct_id).first()
+            if seo:
+                seo_metatag_name = get_seo_metatag_name(metatag_name)
+                setattr(seo, seo_metatag_name, '')
+                seo.save()
+                self.data["items"][item_key][metatag_name]["seo_text"] = None
+                self.instance.delete_cache(item_key=item_key)
+
+        signals.post_save.connect(seo_save_handler, Seo)
 
     def update(self, metatag_name):
 
@@ -247,14 +267,20 @@ class SeoTemplateAdminForm(forms.ModelForm):
 
         operations = self.cleaned_data[metatag_name + "_operation"]
 
-        limit = int(self.cleaned_data[metatag_name + "_l"])
-        texts = self.data[metatag_name]["list"]
-
+        # Применение операций
         if self.GENERATE_TEXTS in operations:
             self.generate_texts(metatag_name)  # Генерация текстов по шаблону и запись в список текстов
 
         if self.APPLY_TEXTS in operations:
             self.apply_texts(metatag_name)  # Назначение свободных текстов дочерним элементам
+
+        if self.ClEAR_TEXTS in operations:
+            self.clear_texts(metatag_name)  # удалить тексты заполненые вручную
+
+        # Подсчет мета-данных метатега
+        limit = int(self.cleaned_data[metatag_name + "_l"])
+        texts = self.data[metatag_name]["list"]
+
         correct, incorrect = 0, 0
         for text in texts:
             if len(text) > limit:

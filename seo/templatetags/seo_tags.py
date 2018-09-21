@@ -120,6 +120,14 @@ def seogen(item):
                     "desc": get_metatag_data("desc", item_data),
                     "keys": get_metatag_data("keys", item_data)
                 }
-                item_json_seo = json.dumps(item_seo, ensure_ascii=False)
-                cache.set(item_cache_key, item_json_seo)
+            else:
+                item_seo = {
+                    "title": "",
+                    "desc": "",
+                    "keys": ""
+                }
+
+            item_json_seo = json.dumps(item_seo, ensure_ascii=False)
+            cache.set(item_cache_key, item_json_seo)
+
     return item_seo

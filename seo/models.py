@@ -215,14 +215,21 @@ class SeoTemplate(models.Model):
                 self.save()
             return True
 
-    def delete_cache(self, item):
+    def delete_cache(self, item=None, item_key=None):
 
         """ Удалить seo-данные доч. элемента из кэша """
 
-        item_ct = ContentType.objects.get_for_model(item)
-        item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
+        if item_key:
+            item_cache_key = "seo-%s" % item_key
+        else:
+            item_ct = ContentType.objects.get_for_model(item)
+            item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
         cache.delete(item_cache_key)
         return
+
+    def delete_all_cache(self):
+        for item_key in self.data["items"].keys():
+            self.delete_cache(item_key=item_key)
 
     def __str__(self):
         return ""
