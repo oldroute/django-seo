@@ -229,7 +229,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
             # количество текстов станет = количеству элементов
             texts = self.__get_cycled_texts(texts, cycled_count=len(items))
 
-        result = {}
+        result = dict(items)
         if texts and items.keys():
             while texts and items.keys():
                 item_key, value = items.popitem()
