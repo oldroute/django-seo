@@ -216,32 +216,28 @@ class SeoTemplateAdminForm(forms.ModelForm):
         apply_is_cycled = self.cleaned_data.get(metatag_name + "_apply_is_cycled", False)
         texts = self.__get_valid_texts(metatag_name)
 
-        items = {}
-
         # Назначение текстов всем свободным элементам
         if apply_type == self.APPLY_FOR_FREE:
             items = self.__get_free_items(metatag_name)
+
         # Назначение текстов всем элементам
         elif apply_type == self.APPLY_FOR_ALL:
-            items = self.data["items"]
+            items = dict(self.data["items"])
 
         if apply_is_cycled and (len(items) > len(texts)):
             # количество текстов станет = количеству элементов
             texts = self.__get_cycled_texts(texts, cycled_count=len(items))
-
-        result = dict(items)
-        if texts and items.keys():
-            while texts and items.keys():
+        if texts and items:
+            while texts and items:
                 item_key, value = items.popitem()
                 text = texts.pop()
                 item = self.__get_item_instance(item_key)
                 if item:
                     text = resolve_template_vars(item, text)
                 value[metatag_name]["gen_text"] = text
-                result[item_key] = value
+                self.data["items"][item_key] = value
                 # когда тексты или элементы закончтся прервать распределение
 
-            self.data["items"] = result
             self.data[metatag_name]["list"] = texts
         return True
 
@@ -281,7 +277,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
 
     def save(self, commit=True):
 
-        self.data = self.instance.data if self.instance.data else self.set_initial_data()
+        self.data = dict(self.instance.data) if self.instance.data else self.set_initial_data()
         self.data["title"]["limit"] = self.cleaned_data["title_l"]
         self.data["desc"]["limit"] = self.cleaned_data["desc_l"]
         self.data["keys"]["limit"] = self.cleaned_data["keys_l"]
