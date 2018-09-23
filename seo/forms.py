@@ -286,7 +286,6 @@ class SeoTemplateAdminForm(forms.ModelForm):
                 seo_metatag_name = get_seo_metatag_name(metatag_name)
                 setattr(seo, seo_metatag_name, '')
                 seo.save()
-                print "seo"
                 self.data["items"][item_key][metatag_name]["seo_text"] = None
                 self.instance.delete_cache(item_key=item_key)
 
