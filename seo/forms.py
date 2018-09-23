@@ -77,28 +77,58 @@ class SeoTemplateAdminForm(forms.ModelForm):
 
     class Media:
         css = {'all': (
-            'seo/admin/css/report.css',
+            '//code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.min.css',
+            'seo/admin/css/seogen.css',
+
         )}
         js = (
-            '//code.jquery.com/jquery-1.7.1.min.js',
+            '//code.jquery.com/jquery-3.3.1.min.js',
+            '//code.jquery.com/ui/1.12.0/jquery-ui.min.js',
             '//cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.1.0/jquery.browser.min.js',
             '//tablesorter.ru/jquery.tablesorter.min.js',
-            'seo/admin/js/tablesorter_init.js',
+            'seo/admin/js/seogen.js',
         )
 
-    title_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
-    title_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
-    title_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
+    title_operation = forms.MultipleChoiceField(
+        choices=OPERATIONS, required=False, label="",
+        widget=widgets.CheckboxSelectMultiple(attrs={"class": "operation"}),
+    )
+    title_apply_type = forms.ChoiceField(
+        choices=APPLY_TYPES, initial=APPLY_FOR_FREE, required=False,
+        label="", widget=forms.RadioSelect(attrs={"class": "apply_type"}),
+    )
+    title_apply_is_cycled = forms.BooleanField(
+        label=u"Циклически", initial=False, required=False,
+        widget=forms.CheckboxInput(attrs={"class": "apply_is_cycled"}),
+    )
     title_report = forms.CharField(required=False, widget=ReportWidget())
 
-    desc_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
-    desc_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
-    desc_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
+    desc_operation = forms.MultipleChoiceField(
+        choices=OPERATIONS, required=False, label="",
+        widget=widgets.CheckboxSelectMultiple(attrs={"class": "operation"}),
+    )
+    desc_apply_type = forms.ChoiceField(
+        choices=APPLY_TYPES, initial=APPLY_FOR_FREE, required=False,
+        label="", widget=forms.RadioSelect(attrs={"class": "apply_type"}),
+    )
+    desc_apply_is_cycled = forms.BooleanField(
+        label=u"Циклически", initial=False, required=False,
+        widget=forms.CheckboxInput(attrs={"class": "apply_is_cycled"}),
+    )
     desc_report = forms.CharField(required=False, widget=ReportWidget())
 
-    keys_operation = forms.MultipleChoiceField(choices=OPERATIONS, required=False, label="", widget=widgets.CheckboxSelectMultiple())
-    keys_apply_type = forms.ChoiceField(choices=APPLY_TYPES, initial=APPLY_FOR_FREE, label="", widget=forms.RadioSelect(), required=False)
-    keys_apply_is_cycled = forms.BooleanField(label=u"Циклически", initial=False, required=False)
+    keys_operation = forms.MultipleChoiceField(
+        choices=OPERATIONS, required=False, label="",
+        widget=widgets.CheckboxSelectMultiple(attrs={"class": "operation"}),
+    )
+    keys_apply_type = forms.ChoiceField(
+        choices=APPLY_TYPES, initial=APPLY_FOR_FREE, required=False,
+        label="", widget=forms.RadioSelect(attrs={"class": "apply_type"}),
+    )
+    keys_apply_is_cycled = forms.BooleanField(
+        label=u"Циклически", initial=False, required=False,
+        widget=forms.CheckboxInput(attrs={"class": "apply_is_cycled"}),
+    )
     keys_report = forms.CharField(required=False, widget=ReportWidget())
 
     def __init__(self, **kwargs):
@@ -256,6 +286,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
                 seo_metatag_name = get_seo_metatag_name(metatag_name)
                 setattr(seo, seo_metatag_name, '')
                 seo.save()
+                print "seo"
                 self.data["items"][item_key][metatag_name]["seo_text"] = None
                 self.instance.delete_cache(item_key=item_key)
 

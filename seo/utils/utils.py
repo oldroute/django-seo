@@ -50,3 +50,11 @@ def get_seo_models():
         model_name = pair["name"]
         yield django_apps.get_model(app_name, model_name)
 
+
+def get_seo_metatag_name(metatag_name):
+    if "keywords" in metatag_name:
+        return "keywords"
+    elif "desc" in metatag_name:
+        return "description"
+    else:
+        return "title"
