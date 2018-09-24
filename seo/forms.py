@@ -5,11 +5,13 @@ from django import forms
 from django.forms import widgets
 from django.core.urlresolvers import reverse
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import signals
 from seo.models import Seo, SeoTemplate
 from seo.utils.template import resolve_template_vars
 from seo.utils.parser import SeoGenerator
 from seo.utils.utils import get_seo_metatag_name
 from seo.widgets import ReportWidget
+from seo.signals import seo_save_handler
 
 
 class SeoForm(forms.ModelForm):
@@ -276,8 +278,6 @@ class SeoTemplateAdminForm(forms.ModelForm):
         return True
 
     def clear_texts(self, metatag_name):
-        from seo.signals import seo_save_handler
-        from django.db.models import signals
         signals.post_save.disconnect(seo_save_handler, Seo)
         for item_key in self.data["items"].keys():
             item_ct_id, item_id = [int(val) for val in item_key.split('-')]

@@ -52,7 +52,7 @@ def get_seo_models():
 
 
 def get_seo_metatag_name(metatag_name):
-    if "keywords" in metatag_name:
+    if "keys" in metatag_name:
         return "keywords"
     elif "desc" in metatag_name:
         return "description"
