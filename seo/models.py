@@ -2,15 +2,14 @@
 
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes import generic
-from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from jsonfield import JSONField
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.core.cache import cache
 from seo.utils.template import resolve_template_vars
+from seo.utils.utils import delete_cache
 
 
 class Seo(models.Model):
@@ -215,21 +214,9 @@ class SeoTemplate(models.Model):
                 self.save()
             return True
 
-    def delete_cache(self, item=None, item_key=None):
-
-        """ Удалить seo-данные доч. элемента из кэша """
-
-        if item_key:
-            item_cache_key = "seo-%s" % item_key
-        else:
-            item_ct = ContentType.objects.get_for_model(item)
-            item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
-        cache.delete(item_cache_key)
-        return
-
     def delete_all_cache(self):
         for item_key in self.data["items"].keys():
-            self.delete_cache(item_key=item_key)
+            delete_cache(item_key=item_key)
 
     def __str__(self):
         return ""

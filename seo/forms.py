@@ -9,7 +9,7 @@ from django.db.models import signals
 from seo.models import Seo, SeoTemplate
 from seo.utils.template import resolve_template_vars
 from seo.utils.parser import SeoGenerator
-from seo.utils.utils import get_seo_metatag_name
+from seo.utils.utils import get_seo_metatag_name, delete_cache
 from seo.widgets import ReportWidget
 from seo.signals import seo_save_handler
 
@@ -271,7 +271,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
                     text = resolve_template_vars(item, text)
                 value[metatag_name]["gen_text"] = text
                 self.data["items"][item_key] = value
-                self.instance.delete_cache(item_key=item_key)
+                delete_cache(item_key=item_key)
                 # когда тексты или элементы закончтся прервать распределение
 
             self.data[metatag_name]["list"] = texts
@@ -287,7 +287,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
                 setattr(seo, seo_metatag_name, '')
                 seo.save()
                 self.data["items"][item_key][metatag_name]["seo_text"] = None
-                self.instance.delete_cache(item_key=item_key)
+                delete_cache(item_key=item_key)
 
         signals.post_save.connect(seo_save_handler, Seo)
 

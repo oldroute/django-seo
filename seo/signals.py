@@ -4,7 +4,7 @@ from django.db.models import signals
 from catalog.signals import content_object_parent_changed, content_object_created
 from catalog.models import TreeItem
 from seo.models import Seo, SeoTemplate
-from seo.utils.utils import get_seogen_models, get_child_models, is_child_model
+from seo.utils.utils import get_seogen_models, get_child_models, is_child_model, delete_cache
 
 
 def delete_content_object_handler(sender, instance, **kwargs):
@@ -30,7 +30,7 @@ def item_saved_handler(sender, instance, **kwargs):
             parent_ct = ContentType.objects.get_for_model(parent)
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
-                seo_template.delete_cache(instance)
+                delete_cache(instance)
                 seo_template.update_data_item(instance)
             # print "------> SAVE ITEM", type(instance)
 
@@ -64,7 +64,7 @@ def item_deleted_handler(sender, instance, **kwargs):
         if seo_template:
             item = treeitem.content_object
             seo_template.remove_data_item(item)
-            seo_template.delete_cache(item)
+            delete_cache(item)
             # print "------> DEL ITEM", type(item), item
 
 
@@ -80,7 +80,7 @@ def item_parent_changed(sender, instance, **kwargs):
         seo_template_from = SeoTemplate.objects.filter(content_type=parent_from_ct, object_id=parent_from.id).first()
         if seo_template_from:
             seo_template_from.remove_data_item(item)
-            seo_template_from.delete_cache(item)
+            delete_cache(item)
             # print "------> REMOVED FROM", parent_from
 
     parent_to = kwargs.get("parent_to")
@@ -106,8 +106,8 @@ def seo_del_handler(sender, instance, **kwargs):
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
                 seo_template.update_data_item(item)
-                seo_template.delete_cache(item)
                 # print "------> SEO DEL", type(instance), instance
+    delete_cache(item)
 
 
 signals.post_delete.connect(seo_del_handler, sender=Seo)
@@ -124,8 +124,8 @@ def seo_save_handler(sender, instance, **kwargs):
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
                 seo_template.update_data_item(item)
-                seo_template.delete_cache(item)
-                # print "------> SEO SAVE", type(instance), instance
+                print "------> SEO SAVE", type(instance), instance
+    delete_cache(item)
 
 
 signals.post_save.connect(seo_save_handler, sender=Seo)

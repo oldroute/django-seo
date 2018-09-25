@@ -68,7 +68,7 @@ def get_metatag_data(metatag_name, item_data):
     return result
 
 
-def seo_by_template(context, item, item_ct):
+def seo_by_template(item, item_ct):
 
     """ Возврашает seo-запись элемента по приоритету:
         1. Seo-запись из шаблона родителя (если есть родитель с seo-шаблоном)
@@ -97,8 +97,10 @@ def seo_by_template(context, item, item_ct):
                 "keys": get_metatag_data("keys", item_data)
             }
 
-    # seo запись элемента
-    elif item:
+        # seo запись элемента
+        else:
+            item_seo = seo_by_content_object(item, item_ct)
+    else:
         item_seo = seo_by_content_object(item, item_ct)
 
     return item_seo
@@ -149,8 +151,8 @@ def seo(context, item=None, **kwargs):
     return modify_seo(item_seo, **kwargs)
 
 
-@register.inclusion_tag('seo/seo.html', takes_context=True)
-def seogen(context, item, **kwargs):
+@register.inclusion_tag('seo/seo.html')
+def seogen(item, **kwargs):
 
     item_ct = ContentType.objects.get_for_model(item)
     item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
@@ -158,7 +160,7 @@ def seogen(context, item, **kwargs):
     if item_json_seo:
         item_seo = json.loads(item_json_seo)
     else:
-        item_seo = seo_by_template(context, item, item_ct)
+        item_seo = seo_by_template(item, item_ct)
         item_json_seo = json.dumps(item_seo, ensure_ascii=False)
         cache.set(item_cache_key, item_json_seo)
     return modify_seo(item_seo, **kwargs)

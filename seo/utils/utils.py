@@ -1,7 +1,9 @@
-# -*- coding utf-8 -*-
+# -*- coding: utf-8 -*-
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 
 
 def get_seogen_models():
@@ -52,9 +54,23 @@ def get_seo_models():
 
 
 def get_seo_metatag_name(metatag_name):
+
     if "keys" in metatag_name:
         return "keywords"
     elif "desc" in metatag_name:
         return "description"
     else:
         return "title"
+
+
+def delete_cache(item=None, item_key=None):
+
+    """ Удалить seo-данные элемента из кэша """
+
+    if item_key:
+        item_cache_key = "seo-%s" % item_key
+    else:
+        item_ct = ContentType.objects.get_for_model(item)
+        item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
+    cache.delete(item_cache_key)
+    return True
