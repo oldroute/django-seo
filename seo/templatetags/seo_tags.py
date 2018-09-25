@@ -115,21 +115,21 @@ def modify_seo(seo, **kwargs):
     if seo["title"]:
         title_postfix = kwargs.get("title_postfix")
         if title_postfix:
-            seo["title"] += ' ' + title_postfix
+            seo["title"] += title_postfix
 
     if not seo["desc"]:
         seo["desc"] = kwargs.get("desc_default", '')
     if seo["desc"]:
         desc_postfix = kwargs.get("desc_postfix")
         if desc_postfix:
-            seo["desc"] += ' ' + desc_postfix
+            seo["desc"] += desc_postfix
 
     if not seo["keys"]:
         seo["keys"] = kwargs.get("keys_default", '')
     if seo["keys"]:
         keys_postfix = kwargs.get("keys_postfix")
         if keys_postfix:
-            seo["keys"] += ' ' + keys_postfix
+            seo["keys"] += keys_postfix
     return seo
 
 
