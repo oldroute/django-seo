@@ -25,7 +25,7 @@ def seo_by_url(context):
     url = Url.objects.filter(url=path).first()
     if url:
         url_ct = ContentType.objects.get_for_model(url.__class__)
-        seo = Seo.objects.filter(content_type=url_ct, object_id=url_ct).first()
+        seo = Seo.objects.filter(content_type=url_ct, object_id=url.id).first()
         return {
             "title": seo.title,
             "desc": seo.description,
@@ -109,7 +109,6 @@ def seo_by_template(item, item_ct):
 def modify_seo(seo, **kwargs):
 
     """ Добавить префикс или установить дефолтное значение метатегам """
-
     if not seo["title"]:
         seo["title"] = kwargs.get("title_default", '')
     if seo["title"]:
@@ -135,18 +134,17 @@ def modify_seo(seo, **kwargs):
 
 @register.inclusion_tag('seo/seo.html', takes_context=True)
 def seo(context, item=None, **kwargs):
-    item_ct = ContentType.objects.get_for_model(item)
-    item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
-    item_json_seo = cache.get(item_cache_key)
-    if item_json_seo:
-        item_seo = json.loads(item_json_seo)
-    else:
-        if item:
-            item_seo = seo_by_content_object(item, item_ct)
+    if item:
+        item_ct = ContentType.objects.get_for_model(item)
+        item_cache_key = "seo-%d-%d" % (item_ct.id, item.id)
+        item_json_seo = cache.get(item_cache_key)
+        if item_json_seo:
+            item_seo = json.loads(item_json_seo)
         else:
-            item_seo = seo_by_url(context)
-        item_json_seo = json.dumps(item_seo, ensure_ascii=False)
+            item_seo = seo_by_content_object(item, item_ct)
         cache.set(item_cache_key, item_json_seo)
+    else:
+        item_seo = seo_by_url(context)
 
     return modify_seo(item_seo, **kwargs)
 
