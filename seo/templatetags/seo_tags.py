@@ -26,13 +26,13 @@ def seo_by_url(context):
     if url:
         url_ct = ContentType.objects.get_for_model(url.__class__)
         seo = Seo.objects.filter(content_type=url_ct, object_id=url.id).first()
-        return {
-            "title": seo.title,
-            "desc": seo.description,
-            "keys": seo.keywords,
-        }
-    else:
-        return DEFAULT_SEO_OBJ
+        if seo:
+            return {
+                "title": seo.title,
+                "desc": seo.description,
+                "keys": seo.keywords,
+            }
+    return DEFAULT_SEO_OBJ.copy()
 
 
 def seo_by_content_object(item, item_ct):
@@ -47,7 +47,7 @@ def seo_by_content_object(item, item_ct):
             "keys": seo.keywords,
         }
     else:
-        return DEFAULT_SEO_OBJ
+        return DEFAULT_SEO_OBJ.copy()
 
 
 def get_metatag_data(metatag_name, item_data):
