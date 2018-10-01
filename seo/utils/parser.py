@@ -263,7 +263,13 @@ class SeoGenerator:
         else:
             return prepared_template
 
+    def __ustrip(self, text):
+        text = re.sub('^( +)|( +)$', '', text)
+        text = re.sub(' {2,}', ' ', text)
+        return text
+
     def generate_textlist(self):
+
         """ Возвращает сгененрированный по шаблону список текстов """
         try:
             prepared_template = self.__prepare_template(self.template)
@@ -275,7 +281,10 @@ class SeoGenerator:
             if not isinstance(textlist, list):
                 text = textlist.strip()
                 textlist = [text, ] if len(text) else []
-            random.shuffle(textlist)  # перетосовать тексты в случайном порядке
+            else:
+                textlist = [self.__ustrip(text) for text in textlist]
+
+                random.shuffle(textlist)  # перетосовать тексты в случайном порядке
         except:
             raise Exception("Could not create text from template, see the error in log")
         return textlist

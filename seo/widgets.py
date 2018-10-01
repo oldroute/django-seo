@@ -15,7 +15,6 @@ class ReportWidget(Widget):
         metatag_name, data = value
         if not data:
             return ''
-        items = data["items"]
         limit = int(data[metatag_name]["limit"])
         text_objs = []
 
@@ -32,34 +31,41 @@ class ReportWidget(Widget):
             obj["value"] = text
             text_objs.append(obj)
         # Приготовить словарь доч. элементов готовых к выводу в таблице
-        busy_items, free_items = 0, 0
-        for id, value in items.iteritems():
+        items, busy_items, free_items = {}, 0, 0
+        for id, value in data["items"].iteritems():
             text_correct = True
             text_exist = True
-            value["gen_text"] = value[metatag_name]["gen_text"]
-            value["seo_text"] = value[metatag_name]["seo_text"]
+
+            item = {
+                "gen_text": value[metatag_name]["gen_text"],
+                "seo_text": value[metatag_name]["seo_text"],
+                "name": value["name"],
+                'change_link': value["change_link"]
+            }
             if value[metatag_name]["seo_text"]:
                 if len(value[metatag_name]["seo_text"]) > limit:
                     text_correct = False
             elif value[metatag_name]["gen_text"]:
                 if len(value[metatag_name]["gen_text"]) > limit:
                     text_correct = False
+
             else:
                 text_exist = False
 
             if not text_exist:
-                free_items +=1
-                value["warning"] = u"Текст отсутствует, заполните вручную или примените текст из шаблона"
-                value["class"] = "danger"
+
+                free_items += 1
+                item["warning"] = u"Текст отсутствует, заполните вручную или примените текст из шаблона"
+                item["class"] = "danger"
             else:
                 if not text_correct:
-                    value["warning"] = u"Количество символов в тексте превышает " \
+                    item["warning"] = u"Количество символов в тексте превышает " \
                                        u"допустимое ограничение в %s символов" % limit
-                    value["class"] = "warning"
+                    item["class"] = "warning"
                 else:
                     busy_items += 1
 
-            items[id] = value
+            items[id] = item
 
         context = {
             "correct": correct,

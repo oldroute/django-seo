@@ -51,15 +51,15 @@ class SeoTemplateInline(GenericStackedInline):
     max_num = 1
     fieldsets = (
         (u'title', {
-            "fields": ("title_t", "title_l", ('title_operation', 'title_apply_type', 'title_apply_is_cycled'), 'title_report', ),
+            "fields": ("title_t", ("title_a", "title_l"), ('title_operation', 'title_apply_type', 'title_apply_is_cycled'), 'title_report', ),
             "classes": ("collapse",)
         }),
         (u'description', {
-            "fields": ("desc_t", "desc_l", ('desc_operation', 'desc_apply_type', 'desc_apply_is_cycled'), 'desc_report',),
+            "fields": ("desc_t",  ("desc_a", "desc_l"), ('desc_operation', 'desc_apply_type', 'desc_apply_is_cycled'), 'desc_report',),
             "classes": ("collapse",)
         }),
         (u'keywords', {
-            "fields": ("keys_t", "keys_l", ('keys_operation', 'keys_apply_type', 'keys_apply_is_cycled'), 'keys_report',),
+            "fields": ("keys_t",  ("keys_a", "keys_l"), ('keys_operation', 'keys_apply_type', 'keys_apply_is_cycled'), 'keys_report',),
             "classes": ("collapse",)
         }),
         # ('json', {

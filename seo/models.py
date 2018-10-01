@@ -10,6 +10,7 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from seo.utils.template import resolve_template_vars
 from seo.utils.utils import delete_cache
+from seo.utils.parser import SeoGenerator
 
 
 class Seo(models.Model):
@@ -70,11 +71,16 @@ class SeoTemplate(models.Model):
         verbose_name_plural = u"seo шаблоны"
 
     title_t = models.TextField(verbose_name=u"шаблон заголовка", null=True, blank=True)
-    title_l = models.PositiveIntegerField(verbose_name=u"max символов", default=180)
+    title_l = models.PositiveIntegerField(verbose_name=u"max символов", default=250)
+    title_a = models.BooleanField(verbose_name=u'автогенерация текста для новых товаров', default=True)
+
     desc_t = models.TextField(verbose_name=u"шаблон описания", null=True, blank=True)
-    desc_l = models.PositiveIntegerField(verbose_name=u"max символов", default=180)
+    desc_l = models.PositiveIntegerField(verbose_name=u"max символов", default=250)
+    desc_a = models.BooleanField(verbose_name=u'автогенерация текста для новых товаров', default=True)
+
     keys_t = models.TextField(verbose_name=u"шаблон ключевых слов", null=True, blank=True)
-    keys_l = models.PositiveIntegerField(verbose_name=u"max символов", default=180)
+    keys_l = models.PositiveIntegerField(verbose_name=u"max символов", default=250)
+    keys_a = models.BooleanField(verbose_name=u'автогенерация текста для новых товаров', default=True)
 
     data = JSONField(verbose_name=u'json-данные', blank=True, null=True)
 
@@ -126,11 +132,24 @@ class SeoTemplate(models.Model):
         """ Возвращает сгенерированный валидный текст метатега """
 
         limit = self.data[metatag_name]["limit"]
-        for i in range(len(self.data[metatag_name]["list"])):
-            if len(self.data[metatag_name]["list"][i]) <= limit:
-                text = self.data[metatag_name]["list"].pop(i)
-                text = resolve_template_vars(item, text)
-                return text
+        template = getattr(self, metatag_name + '_t')
+        autogeneration = getattr(self, metatag_name + '_a')
+
+        if self.data[metatag_name]["list"]:
+            for i in range(len(self.data[metatag_name]["list"])):
+                raw_text = self.data[metatag_name]["list"].pop(i)
+                text = resolve_template_vars(item, raw_text)
+                if len(text) <= limit:
+                    return text
+
+        elif template and autogeneration:
+            seo_generator = SeoGenerator(template)
+            textlist = seo_generator.generate_textlist()
+            for raw_text in textlist:
+                text = resolve_template_vars(raw_text)
+                if len(text) <= limit:
+                    return text
+
         return None
 
     def create_data_item(self, item, need_save=True):

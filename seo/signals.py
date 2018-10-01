@@ -124,7 +124,7 @@ def seo_save_handler(sender, instance, **kwargs):
             seo_template = SeoTemplate.objects.filter(content_type=parent_ct, object_id=parent.id).first()
             if seo_template:
                 seo_template.update_data_item(item)
-                print "------> SEO SAVE", type(instance), instance
+                # print "------> SEO SAVE", type(instance), instance
     delete_cache(item)
 
 
