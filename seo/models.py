@@ -146,7 +146,7 @@ class SeoTemplate(models.Model):
             seo_generator = SeoGenerator(template)
             textlist = seo_generator.generate_textlist()
             for raw_text in textlist:
-                text = resolve_template_vars(raw_text)
+                text = resolve_template_vars(item, raw_text)
                 if len(text) <= limit:
                     return text
 
