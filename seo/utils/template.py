@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import re
+from numbers import Number
 
 
 class VarObj:
@@ -8,9 +9,13 @@ class VarObj:
         пример переменных: #name#, #name_st#
     """
     def __init__(self, var, val, suf):
+
         self.var = var
-        self.val = val
         self.suf = suf
+        if isinstance(val, Number):
+            self.val = unicode(val)
+        else:
+            self.val = val
 
 
 def var_is_long_title(var):
@@ -20,7 +25,9 @@ def var_is_long_title(var):
 
 
 def get_long_title_val(obj, var):
+
     """ Получить значение long_title (long_name) по умолчанию name """
+
     val = ""
     try:
         if var.endswith("_st"):
@@ -41,6 +48,7 @@ def get_long_title_val(obj, var):
 
 
 def resolve_template_vars(obj, template):
+
     """ Заменяет переменные шаблона на значения одноименных атрибутов объекта
         если исходны шаблон пустая строка или в нем нет переменных то возвращает исходный шаблон"""
 
