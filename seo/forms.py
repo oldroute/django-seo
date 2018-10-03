@@ -87,7 +87,7 @@ class SeoTemplateAdminForm(forms.ModelForm):
             '//code.jquery.com/jquery-3.3.1.min.js',
             '//code.jquery.com/ui/1.12.0/jquery-ui.min.js',
             '//cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.1.0/jquery.browser.min.js',
-            '//tablesorter.ru/jquery.tablesorter.min.js',
+            'seo/admin/js/tablesorter.js',
             'seo/admin/js/seogen.js',
         )
 
